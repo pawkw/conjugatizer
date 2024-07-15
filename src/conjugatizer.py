@@ -22,12 +22,12 @@ def main(file_list: list):
     buffer = TokenBuffer()
     buffer.init_patterns(patterns)
     buffer.load_files(file_list)
-    buffer.config(skip_white_space=True)
+    buffer.config(skip_white_space=True, skip_EOF = False, skip_EOL = False)
     buffer.tokenize()
 
     while not buffer.out_of_tokens():
         peek: Token = buffer.peek()
-        file, line, column = buffer.get_position()
+        file, line, _ = buffer.get_position()
         print(f"file: {file} line {line} column {peek.column} type: {peek.type} value: '{peek.value}'")
         buffer.consume()
 
