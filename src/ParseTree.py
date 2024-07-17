@@ -2,8 +2,16 @@ from dataclasses import dataclass
 
 @dataclass
 class Assignment:
-    left_side: str
-    right_side: str
+    left_side: list[str]
+    right_side: list[str]
+
+
+@dataclass
+class Conjugation:
+    tense: str
+    mood: str
+    suffix: str
+    assignments: list[Assignment]
 
 
 class ParseTree:
@@ -12,6 +20,6 @@ class ParseTree:
 
     def set_pronouns(self, pronouns: list[Assignment]):
         for pronoun in pronouns:
-            self.pronoun_dict[pronoun.left_side] = pronoun.right_side
+            self.pronoun_dict[pronoun.left_side.join(' ')] = pronoun.right_side.join(' ')
 
 
