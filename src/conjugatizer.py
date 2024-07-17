@@ -19,7 +19,7 @@ def main(file_list: list):
         'H2': r'##\s+',
         'H1': r'#\s+',
         'definition': r'\w+\:',
-        'suffix': r'\s-\w+',
+        'suffix': r'-\w+',
         'assignment': r'=',
         'word': r'\w+',
     }
@@ -51,9 +51,13 @@ if __name__ == "__main__":
     file_list = []
     log_level = logging.CRITICAL
     log_file = None
-    
+    skip_next_argument = False
     for argument_number in range(len(sys.argv)):
         if argument_number == 0:
+            continue
+
+        if skip_next_argument:
+            skip_next_argument = False
             continue
 
         argument = sys.argv[argument_number]
@@ -61,12 +65,12 @@ if __name__ == "__main__":
             match argument[1:]:
                 case 'log_level':
                     log_level = log_level_dict[sys.argv[argument_number+1]]
-                    argument_number += 1
+                    skip_next_argument = True
                 case 'v' | 'verbose':
                     log_level = log_level_dict['debug']
                 case '-log_file':
                     log_file = sys.argv[argument_number+1]
-                    argument_number += 1
+                    skip_next_argument = True
                 case _:
                     print_help()
                     exit(1)
