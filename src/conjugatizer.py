@@ -11,9 +11,24 @@ def print_help():
     indent = "    "
     print("Usage:")
     print(f"{sys.argv[0]} [options] [files]")
-
-
-def main(file_list: list):
+    print('\nOptions:')
+    print("-log_level [level]:")
+    print(f"{indent}Sets the minimum logging level. The levels are:")
+    print(f"{indent}{indent}debug - All log events are reported.")
+    print(f"{indent}{indent}info")
+    print(f"{indent}{indent}warning")
+    print(f"{indent}{indent}error")
+    print(f"{indent}{indent}critical - Only program crashes are reported.")
+    print("-v or -verbose:")
+    print(f"{indent}The equivalent of '-log_level debug")
+    print("-log_file [filename]:")
+    print(f"{indent}Log reports are sent to a file instead of standard out.")
+    print("-backend or -background:")
+    print(f"{indent}Starts the program in non-interactive mode.")
+    print(f"{indent}This is meant for wrapper programs that run the program")
+    print(f"{indent}as a backend.")
+    print()
+def main(file_list: list, backend: bool):
     patterns = {
         'H3': r'###\s+',
         'H2': r'##\s+',
@@ -36,6 +51,8 @@ def main(file_list: list):
     ast = parse(buffer)
     logger.info('Finished parse.')
 
+    # conjugatize(ast, backend)
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print_help()
@@ -51,6 +68,7 @@ if __name__ == "__main__":
     file_list = []
     log_level = logging.CRITICAL
     log_file = None
+    backend = False
     skip_next_argument = False
     for argument_number in range(len(sys.argv)):
         if argument_number == 0:
@@ -68,9 +86,11 @@ if __name__ == "__main__":
                     skip_next_argument = True
                 case 'v' | 'verbose':
                     log_level = log_level_dict['debug']
-                case '-log_file':
+                case 'log_file':
                     log_file = sys.argv[argument_number+1]
                     skip_next_argument = True
+                case 'backend' | 'background':
+                    backend = True
                 case _:
                     print_help()
                     exit(1)
@@ -80,4 +100,4 @@ if __name__ == "__main__":
     logging.basicConfig(level=log_level)
     if log_file:
         logging.basicConfig(filename=log_file)
-    main(file_list)
+    main(file_list, backend)
