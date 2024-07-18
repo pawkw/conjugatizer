@@ -50,3 +50,50 @@ class ParseTree:
         else:
             self.irregular_verbs[verb] = tense_entry
         self.irregular_verb_glosses[verb] = gloss
+
+    def find_verb(self, verb: str) -> tuple:
+        verb_type = 'unknown'
+        gloss = 'unknown'
+
+        if verb in self.irregular_verbs.keys():
+            verb_type = 'irregular'
+            gloss = self.irregular_verb_glosses[verb]
+        elif verb in self.regular_verbs.keys():
+            verb_type = 'regular'
+            gloss = self.regular_verbs[verb]
+        
+        return verb_type, gloss
+    
+    def find_irregular_conjugation(self, verb: str, tense: str, mood: str) -> dict:
+        result = None
+        target = {}
+        if verb in self.irregular_verbs.keys():
+            target = self.irregular_verbs[verb]
+        else:
+            return result
+        
+        if tense in target.keys():
+            target = target[tense]
+        else:
+            return result
+        
+        if mood in target.keys():
+            result = target[mood]
+        return result
+    
+    def find_conjugation(self, suffix: str, tense: str, mood: str) -> dict:
+        result = None
+        target = {}
+        if suffix in self.conjugation_dict.keys():
+            target = self.conjugation_dict[suffix]
+        else:
+            return result
+        
+        if tense in target.keys():
+            target = target[tense]
+        else:
+            return result
+        
+        if mood in target.keys():
+            result = target[mood]
+        return result

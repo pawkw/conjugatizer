@@ -1,5 +1,6 @@
-from TokenBuffer import Token, TokenBuffer
+from TokenBuffer import TokenBuffer
 from parse import parse
+from UI import conjugatize
 import logging
 import sys
 
@@ -28,6 +29,8 @@ def print_help():
     print(f"{indent}This is meant for wrapper programs that run the program")
     print(f"{indent}as a backend.")
     print()
+
+
 def main(file_list: list, backend: bool):
     patterns = {
         'H3': r'###\s+',
@@ -51,7 +54,7 @@ def main(file_list: list, backend: bool):
     ast = parse(buffer)
     logger.info('Finished parse.')
 
-    # conjugatize(ast, backend)
+    conjugatize(ast, backend)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
