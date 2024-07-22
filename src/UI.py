@@ -2,6 +2,7 @@ from ParseTree import ParseTree
 from dataclasses import dataclass
 from TokenBuffer import tokenize
 import logging
+import random
 
 logger = logging.getLogger(__name__)
 g_backend: bool = False
@@ -36,6 +37,7 @@ def helper_get_root(verb: str):
 
 def command_apply_conjugation(verb: str, conjugation: dict) -> dict:
     result = {}
+    logger.debug(f'command_apply_conjugation: verb = {verb} dict = {conjugation}')
     root = helper_get_root(verb)
     for person, ending in conjugation.items():
         result[person] = root + ending[1:]
@@ -43,6 +45,7 @@ def command_apply_conjugation(verb: str, conjugation: dict) -> dict:
 
 
 def command_conjugate(ast: ParseTree, verb: str, tense: str = 'present', mood: str = 'indicative') -> dict:
+    logger.debug(f'command_conjugate: verb = {verb} tense = {tense} mood = {mood}')
     suffix = command_get_suffix(verb)
     verb_type, _ = command_get_verb(ast, verb)
     if verb_type == 'unknown':
@@ -50,6 +53,7 @@ def command_conjugate(ast: ParseTree, verb: str, tense: str = 'present', mood: s
         return None
     
     conjugation = command_get_conjugation(ast, suffix, tense, mood)
+    logger.debug(f'command_conjugate: conjugation = {conjugation}')
     result = command_apply_conjugation(verb, conjugation)
     if verb_type == 'irregular':
         conjugation_differences = ast.find_irregular_conjugation(verb, tense, mood)
@@ -100,9 +104,85 @@ def parse_conjugate(ast: ParseTree, user_input: list[str]) -> str:
 
     return result_string
 
+
+def command_save(ast: ParseTree, title: str, chunks: bool=False):
+    chunk_names = {
+        'pronouns': '_pronouns',
+        'conjugations': '_conjugations',
+        'regular': '_regular_verbs',
+        'irregular': '_irregular_verbs'
+    }
+
+    filename = title + '.md'
+    file_mode = 'w' if chunks else 'a'
+
+    # Pronouns
+    if chunks:
+        filename = title + chunk_names['pronouns'] + '.md'
+    with open(filename, 'w') as out:
+        out.write('# Pronouns\n')
+        for person, pronoun in ast.pronoun_dict.items():
+            out.write(f'{person} = {pronoun}\n')
+        out.write('\n')
+
+    # Conjugations
+    if chunks:
+        filename = title + chunk_names['conjugations'] + '.md'
+    with open(filename, file_mode) as out:
+        for suffix, tense_dict in ast.conjugation_dict.items():
+            for tense, mood_dict in tense_dict.items():
+                for mood, person_dict in mood_dict.items():
+                    out.write(f'# Conjugation: {tense} {mood} of {suffix}\n')
+                    for person, ending in person_dict.items():
+                        out.write(f'{person} = {ending}\n')
+                    out.write('\n')
+
+    # Regular
+    if chunks:
+        filename = title + chunk_names['regular'] + '.md'
+    with open(filename, file_mode) as out:
+        out.write('# Regular\n')
+        for verb, gloss in ast.regular_verbs.items():
+            out.write(f'{verb} = {gloss}\n')
+        out.write('\n')
+
+    # Irregular
+    if chunks:
+        filename = title + chunk_names['irregular'] + '.md'
+    with open(filename, file_mode) as out:
+        for verb, tense_dict in ast.irregular_verbs.items():
+            for tense, mood_dict in tense_dict.items():
+                for mood, person_dict in mood_dict.items():
+                    out.write(f'# Irregular: {tense} {mood} of {verb} = {ast.irregular_verb_glosses[verb]}\n')
+                    for person, entry in person_dict.items():
+                        out.write(f'{person} = {entry}\n')
+                    out.write('\n')
+
+
+def parse_save(ast: ParseTree, args: list[str]):
+    title = args[-1]
+    chunks = False
+    if len(args) == 2:
+        if args[0] == 'chunks':
+            chunks = True
+        else:
+            command_error(f'parse_save', 'No option "{args[0]}" available.')
+            return
+    command_save(ast, title, chunks)
+
+
+def command_random(ast: ParseTree, args: list[str]):
+    pass
+
+
+def parse_random(ast: ParseTree, args: list[str]):
+    pass
+
+
 commands = {
     'conjugate': (parse_conjugate, 'conjugate <verb> pronouns(False) <tense(present)> <mood(indicative)>'),
-    'save': (None, 'save <filename> chunks(False)\nSaves a new file with the language information. If you specify "chunks", it\nwill save sections as individual files.')
+    'save': (parse_save, 'save <filename> chunks(False)\nSaves a new file with the language information. If you specify "chunks", it\nwill save sections as individual files.'),
+    'random': (None, 'random <tense(present)> <mood(indicative)>\nReturn a random verb in a random person and number')
 }
 
 def conjugatize(ast: ParseTree, backend: bool):
