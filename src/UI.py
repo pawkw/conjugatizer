@@ -181,8 +181,9 @@ def parse_random(ast: ParseTree, args: list[str]):
 
 commands = {
     'conjugate': (parse_conjugate, 'conjugate <verb> pronouns(False) <tense(present)> <mood(indicative)>'),
-    'save': (parse_save, 'save <filename> chunks(False)\nSaves a new file with the language information. If you specify "chunks", it\nwill save sections as individual files.'),
-    'random': (None, 'random <tense(present)> <mood(indicative)>\nReturn a random verb in a random person and number')
+    'save': (parse_save, 'save <filename> (chunks)\nSaves a new file with the language information. If you specify "chunks", it\nwill save sections as individual files.'),
+    'random': (None, 'random <tense(present)> <mood(indicative)>\nReturn a random verb in a random person and number.'),
+    'search': (None, 'search (gloss) <verb>\nSearch for a verb. Add "gloss" to search for English gloss.')
 }
 
 def conjugatize(ast: ParseTree, backend: bool):

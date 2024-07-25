@@ -153,7 +153,7 @@ def parse_specification(tokens: TokenBuffer) -> tuple:
     tokens.consume()
     if tokens.peek().value != 'of':
         logger.critical("parse_specification: did not find the word 'of'.")
-        parse_error("Expected (word) (word) of (word).")
+        parse_error("Expected (word) (word) of (word).", tokens, "parse_specification")
     tokens.consume()
     word3 = tokens.peek().value
     logger.debug(f"parse_specification: word3='{word3}'.")
